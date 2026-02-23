@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECTS_DIR="$BASE_DIR/../projects"
+PREVIEWS_DIR="$BASE_DIR/../previews"
+
+mkdir -p "$PROJECTS_DIR"
+mkdir -p "$PREVIEWS_DIR"
+
+source "$BASE_DIR/lib/core.sh"
+source "$BASE_DIR/lib/project.sh"
+source "$BASE_DIR/lib/extras.sh"
+
+CMD=${1:-}
+PROJECT=${2:-}
+
+case "$CMD" in
+
+  new)
+    create_project "$PROJECT" "${3:-php}"
+    ;;
+
+  run)
+    if [ "$PROJECT" = "platform" ] || [ -z "$PROJECT" ]; then
+      start_platform
+    else
+      start_project "$PROJECT"
+    fi
+    ;;
+
+  stop)
+    if [ "$PROJECT" = "platform" ] || [ -z "$PROJECT" ]; then
+      stop_platform
+    else
+      stop_project "$PROJECT"
+    fi
+    ;;
+
+  restart)
+    if [ "$PROJECT" = "platform" ] || [ -z "$PROJECT" ]; then
+      stop_platform
+      start_platform
+    else
+      stop_project "$PROJECT"
+      start_project "$PROJECT"
+    fi
+    ;;
+
+  deploy)
+    deploy_project "$PROJECT"
+    ;;
+
+  preview)
+    preview_project "$PROJECT" "$3"
+    ;;
+
+  logs)
+    if [ "$PROJECT" = "platform" ] || [ -z "$PROJECT" ]; then
+      docker compose -f "$BASE_DIR/docker-compose.yml" logs ${3:-} ${4:-}
+    elif [ -f "$PROJECTS_DIR/$PROJECT/docker-compose.extra.yml" ]; then
+      docker compose -f "$PROJECTS_DIR/$PROJECT/docker-compose.extra.yml" logs ${3:-} ${4:-}
+    else
+      echo "Projeto $PROJECT não encontrado ou não possui serviços extras."
+    fi
+    ;;
+
+  *)
+    echo "Comandos:"
+    echo "dev new nome [template]         (php, static, laravel)"
+    echo "dev run [nome|platform]"
+    echo "dev stop [nome|platform]"
+    echo "dev restart [nome|platform]"
+    echo "dev logs [nome|platform] [-f]"
+    echo "dev deploy nome"
+    echo "dev preview nome branch"
+    ;;
+esac

@@ -1,0 +1,58 @@
+services:
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: dev-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../projects:/var/www/projects
+      - ../previews:/var/www/previews
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+    networks:
+      - dev-net
+
+  node:
+    image: node:22-alpine
+    container_name: dev-node
+    working_dir: /var/www
+    command: tail -f /dev/null
+    volumes:
+      - ../projects:/var/www/projects
+      - ../previews:/var/www/previews
+    networks:
+      - dev-net
+
+  db:
+    image: mariadb:11
+    container_name: dev-db
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - dev-net
+
+  adminer:
+    image: adminer:5
+    container_name: dev-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - dev-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: dev-redis
+    networks:
+      - dev-net
+
+networks:
+  dev-net:
+    name: portfolio-dev-net
+
+volumes:
+  db-data:
+  caddy-data:

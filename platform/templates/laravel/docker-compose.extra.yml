@@ -1,0 +1,15 @@
+services:
+  {{PROJECT_NAME}}-php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: {{PROJECT_NAME}}-php
+    volumes:
+      - .:/var/www/projects/{{PROJECT_NAME}}
+    networks:
+      - dev-net
+
+networks:
+  dev-net:
+    name: portfolio-dev-net
+    external: true
