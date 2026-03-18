@@ -2,13 +2,19 @@
     auto_https off
 }
 
-http://*.local {
+http://*.lvh.me {
+    root * /var/www/projects/{labels.2}/app/public
+    php_fastcgi {labels.2}-php:9000
+    file_server
+}
+
+http://*.test {
     root * /var/www/projects/{labels.1}/app/public
     php_fastcgi {labels.1}-php:9000
     file_server
 }
 
-http://*.preview.local {
+http://*.preview.test {
     root * /var/www/previews/{labels.2}/app/public
     php_fastcgi {labels.2}-php:9000
     file_server

@@ -53,6 +53,8 @@ Deep dive into the heart of modern engineering:
 | `dev logs [name\|platform] [-f]` | Tail service logs. |
 | `dev deploy <name>` | Laravel-specific deployment routines. |
 | `dev preview <name> <branch>` | Create a non-destructive staging copy. |
+| `dev npm [name] <command>` | Run npm inside project (uses 'app' folder if it exists). |
+| `dev exec [target] [service] <cmd>` | Execute command in container (uses 'app' folder if it exists). |
 
 </details>
 
@@ -90,6 +92,9 @@ Mergulhe no coração da engenharia moderna:
 
 # Rode e Acesse (http://meu-projeto.local)
 ./platform/dev run meu-projeto
+
+# Compile assets frontend
+./platform/dev npm meu-projeto run dev
 ```
 
 ### Tabela de Comandos
@@ -102,6 +107,8 @@ Mergulhe no coração da engenharia moderna:
 | `dev logs [nome\|platform] [-f]` | Acompanha logs dos serviços. |
 | `dev deploy <nome>` | Rotinas de deploy específicas para Laravel. |
 | `dev preview <nome> <branch>` | Cria uma cópia de staging não destrutiva. |
+| `dev npm [nome] <comando>` | Roda npm no projeto (usa a pasta 'app' se ela existir). |
+| `dev exec [alvo] [serviço] <cmd>` | Executa comando no container (usa a pasta 'app' se ela existir). |
 
 </details>
 
