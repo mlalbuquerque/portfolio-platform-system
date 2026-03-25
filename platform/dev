@@ -71,6 +71,23 @@ case "$CMD" in
     fi
     ;;
 
+  npx)
+    # Se o segundo argumento não for uma pasta de projeto, tenta detectar o projeto atual
+    if [ ! -d "$PROJECTS_DIR/$PROJECT" ]; then
+      DETECTED_PROJECT=$(get_current_project)
+      if [ -n "$DETECTED_PROJECT" ]; then
+        # Se detectou projeto, então $PROJECT e os demais são argumentos do npx
+        run_npx "$DETECTED_PROJECT" "$PROJECT" "${@:3}"
+      else
+        echo "Erro: Projeto \"$PROJECT\" não encontrado e você não está dentro de uma pasta de projeto."
+        exit 1
+      fi
+    else
+      # $PROJECT é o nome do projeto
+      run_npx "$PROJECT" "${@:3}"
+    fi
+    ;;
+
   exec)
     if [ "$PROJECT" = "platform" ]; then
       run_exec "platform" "${@:3}"
@@ -94,7 +111,7 @@ case "$CMD" in
     elif [ -f "$PROJECTS_DIR/$PROJECT/docker-compose.extra.yml" ]; then
       docker compose -f "$PROJECTS_DIR/$PROJECT/docker-compose.extra.yml" logs ${3:-} ${4:-}
     else
-      echo "Projeto $PROJECT não encontrado ou não possui serviços extras."
+      log_error "Projeto $PROJECT não encontrado ou não possui serviços extras."
     fi
     ;;
 
@@ -108,6 +125,7 @@ case "$CMD" in
     echo "dev deploy nome"
     echo "dev preview nome branch"
     echo "dev npm [nome] comando      (ex: dev npm run dev ou dev npm my-project install)"
+    echo "dev npx [nome] comando      (ex: dev npx tailwindcss init)"
     echo "dev exec [alvo] [serviço] comando   (ex: dev exec platform db mysql ou dev exec my-project ls)"
     ;;
 esac

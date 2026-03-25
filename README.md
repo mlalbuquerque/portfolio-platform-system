@@ -54,6 +54,7 @@ Deep dive into the heart of modern engineering:
 | `dev deploy <name>` | Laravel-specific deployment routines. |
 | `dev preview <name> <branch>` | Create a non-destructive staging copy. |
 | `dev npm [name] <command>` | Run npm inside project (uses 'app' folder if it exists). |
+| `dev npx [name] <command>` | Run npx inside project (uses 'app' folder if it exists). |
 | `dev exec [target] [service] <cmd>` | Execute command in container (uses 'app' folder if it exists). |
 
 </details>
@@ -102,13 +103,18 @@ Mergulhe no coração da engenharia moderna:
 | :--- | :--- |
 | `dev new <nome> [template]` | Cria projeto (`php`, `static`, `laravel`). |
 | `dev run [nome\|platform]` | Inicia a plataforma ou infra do projeto. |
-| `dev stop [nome\|platform]` | Para os serviços. |
+| `dev stop [nome\|platform]` | Para os serviços. **`stop platform` para todos os projetos e previews.** |
 | `dev restart [nome\|platform]` | Reinício rápido. |
 | `dev logs [nome\|platform] [-f]` | Acompanha logs dos serviços. |
 | `dev deploy <nome>` | Rotinas de deploy específicas para Laravel. |
 | `dev preview <nome> <branch>` | Cria uma cópia de staging não destrutiva. |
 | `dev npm [nome] <comando>` | Roda npm no projeto (usa a pasta 'app' se ela existir). |
+| `dev npx [nome] <comando>` | Roda npx no projeto (usa a pasta 'app' se ela existir). |
 | `dev exec [alvo] [serviço] <cmd>` | Executa comando no container (usa a pasta 'app' se ela existir). |
+
+## 🛠️ Performance & UX
+- **Fast Shutdown:** O serviço `node` está otimizado com `init: true` e `stop_grace_period: 1s` para encerramento imediato.
+- **Visual Feedback:** A CLI utiliza logs coloridos (Verde/Vermelho) com suporte a TrueColor (RGB) para visibilidade em qualquer tema de terminal.
 
 </details>
 

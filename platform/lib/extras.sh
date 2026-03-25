@@ -6,9 +6,9 @@ extras_up() {
 
   if [ -f "../projects/$NAME/docker-compose.extra.yml" ]; then
     docker compose -f "../projects/$NAME/docker-compose.extra.yml" up -d
-    echo "Extras de $NAME iniciados"
+    log_info "Extras de $NAME iniciados"
   else
-    echo "Projeto não possui extras"
+    log_error "Projeto não possui extras"
   fi
 }
 
@@ -17,6 +17,6 @@ extras_down() {
 
   if [ -f "../projects/$NAME/docker-compose.extra.yml" ]; then
     docker compose -f "../projects/$NAME/docker-compose.extra.yml" down
-    echo "Extras de $NAME parados"
+    log_info "Extras de $NAME parados"
   fi
 }

@@ -14,12 +14,12 @@ create_project() {
   mkdir -p "$projects_dir"
 
   if [ -d "$dir" ]; then
-    echo "Erro: Projeto $NAME já existe em $dir"
+    log_error "Erro: Projeto $NAME já existe em $dir"
     exit 1
   fi
 
   if [ "$TEMPLATE" = "laravel" ]; then
-    echo "Criando projeto Laravel em $dir/app..."
+    log_info "Criando projeto Laravel em $dir/app..."
     mkdir -p "$dir"
     composer create-project --prefer-dist laravel/laravel "$dir/app"
     # Copy docker files from template if they exist
@@ -28,12 +28,12 @@ create_project() {
       cp "$templates_dir/laravel/docker-compose.extra.yml" "$dir/"
     fi
   elif [ -d "$templates_dir/$TEMPLATE" ]; then
-    echo "Criando projeto $NAME com template $TEMPLATE..."
+    log_info "Criando projeto $NAME com template $TEMPLATE..."
     mkdir -p "$dir"
     cp -r "$templates_dir/$TEMPLATE/." "$dir/"
   else
-    echo "Erro: Template $TEMPLATE não encontrado em $templates_dir."
-    echo "Templates disponíveis: php, static, laravel"
+    log_error "Erro: Template $TEMPLATE não encontrado em $templates_dir."
+    log_info "Templates disponíveis: php, static, laravel"
     exit 1
   fi
 
@@ -45,8 +45,8 @@ create_project() {
     sed -i "s/{{PROJECT_NAME}}/$NAME/g" "$dir/docker-compose.extra.yml"
   fi
 
-  echo "Projeto $NAME criado em $dir"
-  echo "Pode rodar o projeto com \"dev run $NAME\""
+  log_info "Projeto $NAME criado em $dir"
+  log_info "Pode rodar o projeto com \"dev run $NAME\""
 }
 
 start_project() {
@@ -57,18 +57,18 @@ start_project() {
   local dir="$projects_dir/$NAME"
 
   if [ ! -d "$dir" ]; then
-    echo "Erro: Projeto $NAME não encontrado em $projects_dir"
+    log_error "Erro: Projeto $NAME não encontrado em $projects_dir"
     exit 1
   fi
 
   start_platform
 
   if [ -f "$dir/docker-compose.extra.yml" ]; then
-    echo "Iniciando containers extras para $NAME..."
+    log_info "Iniciando containers extras para $NAME..."
     docker compose -f "$dir/docker-compose.extra.yml" up -d
   fi
 
-  echo "Projeto $NAME rodando em http://$NAME.test/"
+  log_info "Projeto $NAME rodando em http://$NAME.test/"
 }
 
 stop_project() {
@@ -79,7 +79,7 @@ stop_project() {
   local dir="$projects_dir/$NAME"
 
   if [ ! -d "$dir" ]; then
-    echo "Erro: Projeto $NAME não encontrado em $projects_dir"
+    log_error "Erro: Projeto $NAME não encontrado em $projects_dir"
     exit 1
   fi
 
@@ -87,7 +87,7 @@ stop_project() {
     docker compose -f "$dir/docker-compose.extra.yml" down
   fi
 
-  echo "Projeto $NAME parado"
+  log_info "Projeto $NAME parado"
 }
 
 deploy_project() {
@@ -98,16 +98,16 @@ deploy_project() {
   local dir="$projects_dir/$NAME"
 
   if [ ! -d "$dir" ]; then
-    echo "Erro: Projeto $NAME não encontrado em $projects_dir"
+    log_error "Erro: Projeto $NAME não encontrado em $projects_dir"
     exit 1
   fi
 
   if [ -f "$dir/app/artisan" ]; then
     docker exec "${NAME}-php" php /var/www/projects/$NAME/app/artisan optimize
     docker exec "${NAME}-php" php /var/www/projects/$NAME/app/artisan migrate --force
-    echo "Deploy Laravel concluído"
+    log_info "Deploy Laravel concluído"
   else
-    echo "Deploy genérico concluído"
+    log_info "Deploy genérico concluído"
   fi
 }
 
@@ -125,7 +125,7 @@ preview_project() {
   mkdir -p "$previews_dir"
 
   if [ ! -d "$source_dir" ]; then
-    echo "Erro: Projeto $NAME não encontrado em $projects_dir"
+    log_error "Erro: Projeto $NAME não encontrado em $projects_dir"
     exit 1
   fi
 
@@ -140,8 +140,8 @@ preview_project() {
     sed -i "s/$NAME/${NAME}-${BRANCH}/g" "$target_dir/docker-compose.extra.yml"
   fi
 
-  echo "Preview criado em $target_dir"
-  echo "Acesse em: http://${NAME}-${BRANCH}.preview.test/"
+  log_info "Preview criado em $target_dir"
+  log_info "Acesse em: http://${NAME}-${BRANCH}.preview.test/"
 }
 
 run_npm() {
@@ -151,7 +151,7 @@ run_npm() {
   local work_dir="$project_dir"
   
   if [ ! -d "$project_dir" ]; then
-    echo "Erro: Projeto $NAME não encontrado"
+    log_error "Erro: Projeto $NAME não encontrado"
     exit 1
   fi
 
@@ -160,8 +160,28 @@ run_npm() {
     work_dir="$project_dir/app"
   fi
   
-  echo "Executando npm em $work_dir..."
+  log_info "Executando npm em $work_dir..."
   (cd "$work_dir" && npm "$@")
+}
+
+run_npx() {
+  NAME=$1
+  shift
+  local project_dir="$PROJECTS_DIR/$NAME"
+  local work_dir="$project_dir"
+  
+  if [ ! -d "$project_dir" ]; then
+    log_error "Erro: Projeto $NAME não encontrado"
+    exit 1
+  fi
+
+  # Se existir a pasta app, o npx roda dentro dela
+  if [ -d "$project_dir/app" ]; then
+    work_dir="$project_dir/app"
+  fi
+  
+  log_info "Executando npx em $work_dir..."
+  (cd "$work_dir" && npx "$@")
 }
 
 run_exec() {
@@ -179,12 +199,12 @@ run_exec() {
       db)    container="dev-db" ;;
       redis) container="dev-redis" ;;
       *)
-        echo "Erro: Serviço platform \"$service\" não reconhecido (use: proxy, node, db, redis)"
+        log_error "Erro: Serviço platform \"$service\" não reconhecido (use: proxy, node, db, redis)"
         exit 1
         ;;
     esac
 
-    echo "Executando no container $container..."
+    log_info "Executando no container $container..."
     docker exec -it "$container" "$@"
   else
     # Se target não for platform, assume que é um projeto
@@ -199,11 +219,11 @@ run_exec() {
     fi
     
     if ! docker ps --format '{{.Names}}' | grep -q "^${container}$"; then
-      echo "Erro: Container $container não está rodando."
+      log_error "Erro: Container $container não está rodando."
       exit 1
     fi
 
-    echo "Executando no container $container (dir: $work_dir)..."
+    log_info "Executando no container $container (dir: $work_dir)..."
     docker exec -it -w "$work_dir" "$container" "$@"
   fi
 }

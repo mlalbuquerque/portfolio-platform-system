@@ -1,19 +1,56 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Funções de log formatado
+log_info() {
+  # \e[1m = Negrito
+  # \e[38;2;255;255;255m = Texto Branco Puro (RGB)
+  # \e[48;2;0;150;0m = Fundo Verde (RGB)
+  printf "\e[1;38;2;255;255;255;48;2;0;150;0m %s \e[0m\n" "$1"
+}
+
+log_error() {
+  # \e[1m = Negrito
+  # \e[38;2;255;255;255m = Texto Branco Puro (RGB)
+  # \e[48;2;200;0;0m = Fundo Vermelho (RGB)
+  printf "\e[1;38;2;255;255;255;48;2;200;0;0m %s \e[0m\n" "$1"
+}
+
 start_platform() {
   local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   local base_dir="${BASE_DIR:-$script_dir/..}"
   
-  echo "Iniciando infraestrutura global..."
+  log_info "Iniciando infraestrutura global..."
   docker compose -f "$base_dir/docker-compose.yml" up -d --remove-orphans
 }
 
 stop_platform() {
   local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   local base_dir="${BASE_DIR:-$script_dir/..}"
+  local projects_dir="${PROJECTS_DIR:-$base_dir/../projects}"
+  local previews_dir="${PREVIEWS_DIR:-$base_dir/../previews}"
   
-  echo "Parando infraestrutura global..."
+  log_info "Parando todos os projetos..."
+  if [ -d "$projects_dir" ]; then
+    for project_dir in "$projects_dir"/*; do
+      if [ -f "$project_dir/docker-compose.extra.yml" ]; then
+        log_info "Parando projeto: $(basename "$project_dir")"
+        docker compose -f "$project_dir/docker-compose.extra.yml" down
+      fi
+    done
+  fi
+
+  log_info "Parando todos os previews..."
+  if [ -d "$previews_dir" ]; then
+    for preview_dir in "$previews_dir"/*; do
+      if [ -f "$preview_dir/docker-compose.extra.yml" ]; then
+        log_info "Parando preview: $(basename "$preview_dir")"
+        docker compose -f "$preview_dir/docker-compose.extra.yml" down
+      fi
+    done
+  fi
+
+  log_info "Parando infraestrutura global..."
   docker compose -f "$base_dir/docker-compose.yml" down
 }
 
