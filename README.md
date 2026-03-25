@@ -57,6 +57,11 @@ Deep dive into the heart of modern engineering:
 | `dev npx [name] <command>` | Run npx inside project (uses 'app' folder if it exists). |
 | `dev exec [target] [service] <cmd>` | Execute command in container (uses 'app' folder if it exists). |
 
+## 🛠️ Contributing / Roadmap
+There are several tasks planned for the future of the platform (such as new templates for Django, FastAPI, NestJS, etc.). I will be implementing them over time, but if you want to help and speed up the process, feel free to pick a task and get started!
+
+Check out the full task list at: [**TODO.md**](./TODO.md)
+
 </details>
 
 ---
@@ -115,6 +120,11 @@ Mergulhe no coração da engenharia moderna:
 ## 🛠️ Performance & UX
 - **Fast Shutdown:** O serviço `node` está otimizado com `init: true` e `stop_grace_period: 1s` para encerramento imediato.
 - **Visual Feedback:** A CLI utiliza logs coloridos (Verde/Vermelho) com suporte a TrueColor (RGB) para visibilidade em qualquer tema de terminal.
+
+## 🛠️ Contribuindo / Roadmap
+Existem diversas tarefas planejadas para o futuro da plataforma (como novos templates para Django, FastAPI, NestJS, etc.). Eu irei implementá-las aos poucos, mas se você quiser ajudar e acelerar o processo, sinta-se à vontade para escolher uma tarefa e colocar a mão na massa!
+
+Confira a lista completa de tarefas em: [**TODO.md**](./TODO.md)
 
 </details>
 
